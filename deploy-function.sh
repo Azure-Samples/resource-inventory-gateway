@@ -4,7 +4,7 @@
 RESOURCE_GROUP=$1
 LOCATION=$2
 LOCAL_BUILD=$3
-ZIP_URL="https://github.com/yodobrin/resource-inventory/releases/latest/download/functionapp.zip"
+ZIP_URL="https://github.com/Azure-Samples/resource-inventory-gateway/releases/latest/download/functionapp.zip"
 
 # Check if resource group and location are provided
 if [ -z "$RESOURCE_GROUP" ] || [ -z "$LOCATION" ]; then
