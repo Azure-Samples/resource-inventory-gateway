@@ -209,7 +209,7 @@ public class ArmGateway : GatewayFunctionBase
     }
 
     /// <summary>
-    /// Merges the ARM API responses and includes extracted parameter values in the '_gateway' element.
+    /// Merges the ARM API responses and includes extracted parameter values in the 'gateway' element.
     /// </summary>
     /// <param name="jsonResponses">The list of JSON responses from the ARM API calls.</param>
     /// <param name="parameterValuesList">The list of dictionaries containing parameter values extracted from resource IDs.</param>
