@@ -1,0 +1,13 @@
+{
+    "recommendations": [
+        "ms-azuretools.vscode-azurefunctions",
+        "ms-dotnettools.csharp",
+        "ms-vscode.vscode-node-azure-pack",
+        "ms-azuretools.vscode-bicep",
+        "EditorConfig.EditorConfig",
+        "humao.rest-client",
+        "ms-azuretools.vscode-docker",
+        "ms-vscode-remote.remote-containers",
+        "Azurite.azurite"
+    ]
+}

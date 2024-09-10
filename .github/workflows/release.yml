@@ -1,0 +1,48 @@
+name: Package and Release Azure Function
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*.*.*"
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-and-package:
+    runs-on: ubuntu-latest # Use windows-latest if you prefer
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.x" # Adjust this to the .NET version you're using
+
+      - name: Install dependencies
+        run: dotnet restore ./src/ResourceInventory
+
+      - name: Build project
+        run: dotnet build ./src/ResourceInventory --configuration Release --no-restore
+
+      - name: Publish project
+        run: dotnet publish ./src/ResourceInventory --configuration Release --output ./publish --no-restore
+
+      - name: Package as ZIP
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          cd ./publish
+          zip -r $GITHUB_WORKSPACE/functionapp.zip .
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: functionapp.zip
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

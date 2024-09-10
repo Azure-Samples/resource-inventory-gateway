@@ -1,0 +1,71 @@
+### local test arm-gateway
+@armRoute = /subscriptions/$subscriptions/resourceGroups/$resourceGroups/providers/Microsoft.Web/serverfarms/$serverfarms/usages?api-version=2023-12-01
+@resourceIds = /subscriptions/19767923-0285-4f35-8ded-70ed777a825b/resourceGroups/ctrlm-test3/providers/Microsoft.Web/serverfarms/EastUSPlan,/subscriptions/19767923-0285-4f35-8ded-70ed777a825b/resourceGroups/resource-inventory/providers/Microsoft.Web/serverfarms/ASP-resourceinventory-9c3e
+
+
+GET http://localhost:7071/api/ArmGateway?armRoute={{armRoute}}&resourceIds={{resourceIds}}
+
+### local test cost-gateway
+@scope = /subscriptions/19767923-0285-4f35-8ded-70ed777a825b/resourceGroups/ctrlm-test3,/subscriptions/19767923-0285-4f35-8ded-70ed777a825b/resourceGroups/resource-inventory
+
+POST http://localhost:7071/api/CostGateway?scope={{scope}}
+
+{
+    "type": "ActualCost",
+    "timeframe": "MonthToDate",
+    "dataset": {
+        "granularity": "Daily",
+        "aggregation": {
+            "totalCost": {
+                "name": "PreTaxCost",
+                "function": "Sum"
+            }
+        },
+        "grouping": [
+            {
+                "type": "Dimension",
+                "name": "ResourceGroup"
+            }
+        ]
+    }
+}
+
+### GET Request to Resource Inventory Function
+
+@host = {{$dotenv FUNCTION_HOST}}
+@code = {{$dotenv FUNCTION_CODE}}
+@armRoute = /subscriptions/$subscriptions/resourceGroups/$resourceGroups/providers/Microsoft.Web/serverfarms/$serverfarms/usages?api-version=2023-12-01
+@resourceIds = /subscriptions/19767923-0285-4f35-8ded-70ed777a825b/resourceGroups/ctrlm-test3/providers/Microsoft.Web/serverfarms/EastUSPlan,/subscriptions/19767923-0285-4f35-8ded-70ed777a825b/resourceGroups/resource-inventory/providers/Microsoft.Web/serverfarms/ASP-resourceinventory-9c3e
+
+GET https://{{host}}/api/ArmGateway?code={{code}}&armRoute={{armRoute}}&resourceIds={{resourceIds}}
+
+Accept: application/json
+
+### POST Request to Cost Gateway Function
+
+@host = {{$dotenv FUNCTION_HOST}}
+@code = {{$dotenv FUNCTION_CODE}}
+@scope = /subscriptions/19767923-0285-4f35-8ded-70ed777a825b/resourceGroups/ctrlm-test3,/subscriptions/19767923-0285-4f35-8ded-70ed777a825b/resourceGroups/resource-inventory
+
+POST https://{{host}}/api/CostGateway?code={{code}}&scope={{scope}}
+
+{
+    "type": "ActualCost",
+    "timeframe": "MonthToDate",
+    "dataset": {
+        "granularity": "Daily",
+        "aggregation": {
+            "totalCost": {
+                "name": "PreTaxCost",
+                "function": "Sum"
+            }
+        },
+        "grouping": [
+            {
+                "type": "Dimension",
+                "name": "ResourceGroup"
+            }
+        ]
+    }
+}
+
