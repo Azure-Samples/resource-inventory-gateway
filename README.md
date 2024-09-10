@@ -15,7 +15,9 @@ products:
 
 ## Overview
 
-The Resource Inventory Azure Function addresses a key limitation within Azure Workbooks, which currently supports only one ARM (Azure Resource Manager) call at a time. This limitation can make it cumbersome to aggregate data from multiple ARM resources, such as listing model deployments across several Cognitive Services accounts that may span multiple subscriptions and resource groups. The Resource Inventory Function automates these calls, aggregates the results, and returns a single response that can be easily consumed by an Azure Workbook.
+The Resource Inventory Gateway addresses a key limitation within Azure Workbooks, which currently supports only one ARM (Azure Resource Manager) call at a time. This limitation can make it cumbersome to aggregate data from multiple ARM resources, such as listing model deployments across several Cognitive Services accounts that may span multiple subscriptions and resource groups. The Resource Inventory Gateway automates these calls, aggregates the results, and returns a single response that can be easily consumed by an Azure Workbook.
+
+The solution is packaged as an Azure Function, which can be deployed to your Azure subscription. The function is secured with a Managed Identity and supports querying multiple resources across different subscriptions, resource groups, and services. The function can also be used to query the Azure Cost Management API to get cost data for multiple subscriptions.
 
 ## Features
 
@@ -27,7 +29,7 @@ The Resource Inventory Azure Function addresses a key limitation within Azure Wo
 
 ### Security
 
-This solution provide read access to your control plane, it uses a **Managed Identity** for secure and seamless authentication with `Azure Resource Manager` and `Azure Cost Management` APIs. The Managed Identity is assigned the `Reader` role on the entire subscription, management group or tenant. The deployment script will create a User-Assigned Managed Identity and assign it to the Function App on the same subscription, additional subscriptions or management groups can be added to the Managed Identity.
+This solution provide read access to your control plane, it uses a **Managed Identity** for secure and seamless authentication with `Azure Resource Manager` and `Azure Cost Management` APIs. The Managed Identity is assigned the `Reader` role on the entire subscription, management group or tenant. The deployment script will create a User-Assigned Managed Identity and assign it to the Function on the same subscription, additional subscriptions or management groups can be added to the Managed Identity.
 
 Function - the function is secured with a key, a `key` and the `host` are values you will need to update in the workbook.
 
@@ -74,18 +76,14 @@ If you need to list all model deployments across several Cognitive Services acco
 
 ### Deploying the Function
 
-You can deploy the Resource Inventory Function to your Azure subscription using the provided deployment script. Follow these steps:
+You can deploy the Resource Inventory Gateway to your Azure subscription using the provided deployment script. Follow these steps:
 
 1. **Clone the Repository**:
    ```bash
-   git clone https://github.com/yodobrin/resource-inventory.git
-   cd resource-inventory
-   ```
-
-2. **Configure the Deployment Script**:
-   - Update the `deploy-function.sh` script with your specific details (location, etc.).
-
-3. **Run the Deployment Script**:
+   git clone https://github.com/Azure-Samples/resource-inventory-gateway
+   cd resource-inventory-gateway
+  ```
+2. **Run the Deployment Script**:
    ```bash
    bash deploy-function.sh <resource-group-name> <location> [0/1]
    ```
@@ -97,9 +95,6 @@ You can deploy the Resource Inventory Function to your Azure subscription using 
    - Configure CORS to allow all origins.
    - The optional flag, would build the function locally if provided with `1`. if not provided or `0` it will use the latest release from the repo.
 >Note: You need to be logged in to Azure CLI and have the necessary permissions to create resources in the subscription.
-
-4. **Verify Deployment**:
-   - After deployment, the script will output the Function App URL. You can verify the deployment by accessing this URL.
 
 ### Using the Function
 
@@ -128,6 +123,36 @@ GET https://<your-function-app-name>.azurewebsites.net/api/ArmGateway?armRoute=/
 }
 ```
 
+### Adding Sample Workbook
+
+- You should have the local copy of the workbook at this location: `resource-inventory-gateway/Workbook/REST API Aggregator.workbook`. Once loaded to azure it would look like below:
+
+![After creation](./media/2024-09-10-14-57-29.png)
+
+- The next step is to update the function key and the host, these values would be available in the function app view in Azure portal.
+- Mark the host as trusted (this is a one time activity), this is required to make the function call from the workbook.
+
+![Mark as trusted](./media/2024-09-10-15-04-04.png)
+
+The workbook provided is intended as a sample it contains the following sections:
+- **Raw Data**: This is the raw data from the function call
+
+![Raw data](./media/2024-09-10-15-06-33.png)
+
+- **JSON Path table formatting**: showing how to pick & choose what to display from the raw data
+
+![JSON Path](./media/2024-09-10-15-08-02.png)
+
+- **Cost by resource id**: the body of the `cost` api call determines the data that is returned, this is a sample of the data that is returned when we seek billing information on cognitive services.
+
+![Cost by resource](./media/2024-09-10-15-08-56.png)
+
+- **Cost by ResourceId and meter**: sometimes specific meter would have higher impact such as cost of tokens.
+
+![resource id and meter](./media/2024-09-10-15-11-18.png)
+
+- **Cost of multiple resources groups**: this section shows how the information can be retrieved for multiple resource groups.
+
 ### Troubleshooting
 
 - **CORS Issues**: Ensure that CORS is properly configured if you encounter any cross-origin request errors.
@@ -135,14 +160,14 @@ GET https://<your-function-app-name>.azurewebsites.net/api/ArmGateway?armRoute=/
 
 ## Releases
 
-When new features or bug fixes are introduced, a new release will be created. You can find the latest releases [here](https://github.com/yodobrin/resource-inventory/releases). Following are the steps required to update your current deployment with the latest release, there are two steps, the first is to download the latest zip, the second is to deploy it.
+When new features or bug fixes are introduced, a new release will be created. You can find the latest releases [here](https://github.com/Azure-Samples/resource-inventory-gateway/releases). Following are the steps required to update your current deployment with the latest release, there are two steps, the first is to download the latest zip, the second is to deploy it.
 
 **Download the Latest Release**:
 
 ```bash
-curl -L https://github.com/yodobrin/resource-inventory/releases/download/v2.0.2/functionapp.zip -o functionapp.zip
+curl -L https://github.com/Azure-Samples/resource-inventory-gateway/releases/latest/download/functionapp.zip -o functionapp.zip
 ```
-Here it downloads the v2.0.2 release, you can replace the version with the latest one.
+Here it downloads the `latest` release.
 
 **Deploy the Latest Release**:
 

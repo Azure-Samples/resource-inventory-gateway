@@ -4,9 +4,9 @@
     {
       "type": 1,
       "content": {
-        "json": "# REST API Repeater\r\n\r\nPerform REST API request to multiple endpoints."
+        "json": "# REST API Aggregator\r\n\r\nPerform REST API request to multiple endpoints."
       },
-      "name": "text - REST API Repeater"
+      "name": "text - REST API Aggregator"
     },
     {
       "type": 9,
