@@ -27,7 +27,7 @@ The solution is packaged as an Azure Function, which can be deployed to your Azu
 
 ### Security
 
-This solution provide read access to your control plane, it uses a **Managed Identity** for secure and seamless authentication with `Azure Resource Manager` and `Azure Cost Management` APIs. The Managed Identity is assigned the `Reader` role on the entire subscription, management group or tenant. The deployment script will create a User-Assigned Managed Identity and assign it to the Function on the same subscription, additional subscriptions or management groups can be added to the Managed Identity.
+This solution provide read access to your control plane, it uses a [**Managed Identity**](https://learn.microsoft.com/en-us/entra/identity/managed-identities-azure-resources/overview) for secure and seamless authentication with [`Azure Resource Manager`](https://learn.microsoft.com/en-us/rest/api/resources/) and [`Azure Cost Management`](https://learn.microsoft.com/en-us/rest/api/cost-management/) APIs. The Managed Identity is assigned the [`Reader`](https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles/general#reader) role on the entire subscription or management group. The deployment script will create a User-Assigned Managed Identity and assign it to the Function on the same subscription, additional subscriptions or management groups can be added to the Managed Identity.
 
 Function - the function is secured with a key, a `key` and the `host` are values you will need to update in the workbook.
 
@@ -49,7 +49,7 @@ The function expects the following query parameters:
 
 - **Parameter Extraction**: The function extracts parameter names from the `armRoute` and matches them with corresponding parts in the `resourceIds`.
 - **Route Generation**: For each resource ID, the function generates a complete ARM API route by replacing the placeholders in the `armRoute` with actual values.
-- **API Execution**: The function concurrently executes the ARM API requests for all generated routes using the Managed Identity for authentication. The managed identity currently has `Reader` role on the entire subscription, management group or tenant.
+- **API Execution**: The function concurrently executes the ARM API requests for all generated routes using the Managed Identity for authentication. The managed identity currently has `Reader` role on the entire subscription/s or management group/s.
 - **Response Merging**: The results from all API calls are merged into a single JSON response, which is returned to the client. A new JSON element `gateway` is added to the response, which contains the original parameters used for the request.
 
 ### CostGateway Function
@@ -133,32 +133,43 @@ GET https://<your-function-app-name>.azurewebsites.net/api/ArmGateway?armRoute=/
 
 ### Adding Sample Workbook
 
-- You should have the local copy of the workbook at this location: `resource-inventory-gateway/Workbook/REST API Aggregator.workbook`. Once loaded to azure it would look like below:
+This Workbook demonstrates examples of how to leverage the capabilities of the Resource Inventory Gateway, including the use of Workbook Parameters.
 
-![After creation](./media/2024-09-10-14-57-29.png)
+- You should have the local copy of the workbook at this location: [`resource-inventory-gateway/Workbook/REST API Aggregator.workbook`](https://github.com/Azure-Samples/resource-inventory-gateway/blob/main/Workbook/REST%20API%20Aggregator.workbook).
+- Before applying the workbook and save it, you should update 2 values:
+  - `<INSERT_YOUR_FUNCTION_HOST_HERE>` - replace it with your Function host.
+  - `<INSERT_YOUR_FUNCTION_KEY_HERE>` - replace it with your Function key.
+- Once loaded to azure it would look like below:
 
-- The next step is to update the function key and the host, these values would be available in the function app view in Azure portal.
+![After creation](https://github.com/user-attachments/assets/90493202-feb9-4b88-948e-e1f79588ad70)
+
 - Mark the host as trusted (this is a one time activity), this is required to make the function call from the workbook.
 
 ![Mark as trusted](./media/2024-09-10-15-04-04.png)
 
 The workbook provided is intended as a sample it contains the following sections:
 
+#### ARM Gateway
+Get Azure OpenAI Deployments from multiple Azure OpenAI resources.
+
 - **Raw Data**: This is the raw data from the function call
 
-![Raw data](./media/2024-09-10-15-06-33.png)
+![image](https://github.com/user-attachments/assets/0225828f-4761-40f1-8f19-8bf815faa705)
 
-- **JSON Path table formatting**: showing how to pick & choose what to display from the raw data
+- **JSON Path table formatting**: showing how to pick & choose what to display from the raw data and how to format it.
 
-![JSON Path](./media/2024-09-10-15-08-02.png)
+![image](https://github.com/user-attachments/assets/ae023a50-1ccb-4130-827a-cc1beeeb76c6)
+
+#### Cost Gateway
+Get Azure resources cost from multiple subscriptions or resource groups.
 
 - **Cost by resource id**: the body of the `cost` api call determines the data that is returned, this is a sample of the data that is returned when we seek billing information on cognitive services.
 
-![Cost by resource](./media/2024-09-10-15-08-56.png)
+![image](https://github.com/user-attachments/assets/e9fd0979-2961-44c6-97fc-0ba7b6e9b388)
 
 - **Cost by ResourceId and meter**: sometimes specific meter would have higher impact such as cost of tokens.
 
-![resource id and meter](./media/2024-09-10-15-11-18.png)
+![image](https://github.com/user-attachments/assets/f883b256-fd84-4034-8349-a4c294216d4c)
 
 - **Cost of multiple resources groups**: this section shows how the information can be retrieved for multiple resource groups.
 
